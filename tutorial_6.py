@@ -64,11 +64,53 @@ class TabQAgent(object):
         # possible actions migh need to change it to move turnleft turn right and jump
 
         # add 4 more actions jump up 1 move 2 for nesw
-        self.actions = ["movenorth 1", "movewest 1", "moveeast 1","jumpnorth 2", "jumpwest 2", "jumpeast 2"]
+        self.actions = ["moven", "movew", "movee","jumpn", "jumpw", "jumpe"]
 
         self.q_table = {}
         self.canvas = None
         self.root = None
+    def move(self, move: str):
+        self.logger.info("action :" +move)
+        time.sleep(1)
+        if move == "moven":
+            # north
+            agent_host.sendCommand("move 1"  )
+        elif move =="movee":
+            # east
+            agent_host.sendCommand("moveeast 1" )
+        elif move =="moves":
+            # south
+            agent_host.sendCommand("move -1")
+        elif move =="movew":
+            # west
+            agent_host.sendCommand("movewest 1")
+
+        elif move == "jumpn":
+            # j n
+            agent_host.sendCommand("jump 1")
+            agent_host.sendCommand("move 1"  )
+            agent_host.sendCommand("jump 1")
+            agent_host.sendCommand("move 1"  )
+        elif move =="jumpe":
+            # j e
+            agent_host.sendCommand("jump 1")
+            agent_host.sendCommand("strafe -1"  )
+            agent_host.sendCommand("jump 1")
+            agent_host.sendCommand("strafe -1"  )
+        elif move =="jumps":
+            # j s
+            agent_host.sendCommand("jump 1")
+            agent_host.sendCommand("move 1"  )
+            agent_host.sendCommand("jump 1")
+            agent_host.sendCommand("move 1"  )
+        elif move =="jumpw":
+            # j w
+            agent_host.sendCommand("jump 1")
+            agent_host.sendCommand("strafe 1"  )
+            agent_host.sendCommand("jump 1")
+            agent_host.sendCommand("strafe 1"  )
+        
+        time.sleep(1)
 
     # create json files
     def save_q_table(self,q_table):
@@ -105,6 +147,7 @@ class TabQAgent(object):
         new_q = reward
         
         # assign the new action value to the Q-table
+        
         self.q_table[self.prev_s][self.prev_a] = new_q
         
     def act(self, world_state, agent_host, current_r ):
@@ -142,13 +185,25 @@ class TabQAgent(object):
                     l.append(x)
             y = random.randint(0, len(l)-1)
             a = l[y]
-            self.logger.info("Taking q action: %s" % self.actions[a])
+            # self.logger.info("Taking q action: %s" % self.actions[a])
 
         # try to send the selected action, only update prev_s if this succeeds
         try:
-            agent_host.sendCommand(self.actions[a])
+            # agent_host.sendCommand(self.actions[a])
+
+            # self.move(self.actions[a])
+            
+            self.move("moven")
+            self.move("jumpn")
+            self.move("movew")
+            self.move("jumpn")
+
+
+
+
             self.prev_s = current_s
             self.prev_a = a
+            exit(0)
 
         except RuntimeError as e:
             self.logger.error("Failed to send command: %s" % e)
