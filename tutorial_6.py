@@ -70,8 +70,7 @@ class TabQAgent(object):
         self.canvas = None
         self.root = None
     def move(self, move: str):
-        self.logger.info("action :" +move)
-        time.sleep(1)
+        time.sleep(0.3)
         if move == "moven":
             # north
             agent_host.sendCommand("move 1"  )
@@ -94,9 +93,9 @@ class TabQAgent(object):
         elif move =="jumpe":
             # j e
             agent_host.sendCommand("jump 1")
-            agent_host.sendCommand("strafe -1"  )
+            agent_host.sendCommand("moveeast 1"  )
             agent_host.sendCommand("jump 1")
-            agent_host.sendCommand("strafe -1"  )
+            agent_host.sendCommand("moveeast 1"  )
         elif move =="jumps":
             # j s
             agent_host.sendCommand("jump 1")
@@ -106,11 +105,10 @@ class TabQAgent(object):
         elif move =="jumpw":
             # j w
             agent_host.sendCommand("jump 1")
-            agent_host.sendCommand("strafe 1"  )
+            agent_host.sendCommand("movewest 1"  )
             agent_host.sendCommand("jump 1")
-            agent_host.sendCommand("strafe 1"  )
+            agent_host.sendCommand("movewest 1"  )
         
-        time.sleep(1)
 
     # create json files
     def save_q_table(self,q_table):
@@ -135,6 +133,7 @@ class TabQAgent(object):
         new_q = reward
         
         # assign the new action value to the Q-table
+        # if old_q == 0 or new_q> old_q:
         self.q_table[self.prev_s][self.prev_a] = new_q
         
     def updateQTableFromTerminatingState( self, reward ):
@@ -147,8 +146,8 @@ class TabQAgent(object):
         new_q = reward
         
         # assign the new action value to the Q-table
-        
-        self.q_table[self.prev_s][self.prev_a] = new_q
+        if old_q == 0 or new_q> old_q:
+            self.q_table[self.prev_s][self.prev_a] = new_q
         
     def act(self, world_state, agent_host, current_r ):
         """take 1 action in response to the current world state"""
@@ -179,31 +178,32 @@ class TabQAgent(object):
         else:
             m = max(self.q_table[current_s])
             self.logger.info("Current values: %s" % ",".join(str(x) for x in self.q_table[current_s]))
+            self.logger.info(self.actions)
             l = list()
             for x in range(0, len(self.actions)):
                 if self.q_table[current_s][x] == m:
                     l.append(x)
             y = random.randint(0, len(l)-1)
             a = l[y]
-            # self.logger.info("Taking q action: %s" % self.actions[a])
+            self.logger.info("Taking q action: %s" % self.actions[a])
 
         # try to send the selected action, only update prev_s if this succeeds
         try:
             # agent_host.sendCommand(self.actions[a])
 
-            # self.move(self.actions[a])
+            self.move(self.actions[a])
             
-            self.move("moven")
-            self.move("jumpn")
-            self.move("movew")
-            self.move("jumpn")
+            # self.move("moven")
+            # self.move("jumpn")
+            # self.move("movew")
+            # self.move("jumpn")
+            # self.move("jumpn")
 
 
 
 
             self.prev_s = current_s
             self.prev_a = a
-            exit(0)
 
         except RuntimeError as e:
             self.logger.error("Failed to send command: %s" % e)
@@ -233,7 +233,7 @@ class TabQAgent(object):
             if is_first_action:
                 # wait until have received a valid observation
                 while True:
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                     world_state = agent_host.getWorldState()
 
                     for error in world_state.errors:
@@ -248,8 +248,8 @@ class TabQAgent(object):
                 is_first_action = False
             else:
                 # wait for non-zero reward
-                while world_state.is_mission_running and current_r == 0:
-                    time.sleep(0.1)
+                while world_state.is_mission_running and current_r > 1:
+                    time.sleep(0.3)
                     world_state = agent_host.getWorldState()
                     for error in world_state.errors:
                         self.logger.error("Error: %s" % error.text)
@@ -257,7 +257,7 @@ class TabQAgent(object):
                         current_r += reward.getValue()
                 # allow time to stabilise after action
                 while True:
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                     world_state = agent_host.getWorldState()
                     for error in world_state.errors:
                         self.logger.error("Error: %s" % error.text)

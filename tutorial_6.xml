@@ -10,11 +10,14 @@
         <Time><StartTime>1</StartTime></Time>
     </ServerInitialConditions>
        <ServerHandlers>
-      <FlatWorldGenerator generatorString="3;7,220*1,5*3,2;3;,biome_1"/>
+      <FlatWorldGenerator generatorString="3;8,220*1,5*3,2;3;,biome_1"/>
       <DrawingDecorator>
         <!-- coordinates for cuboid are inclusive -->
-        <DrawCuboid x1="-2" y1="46" z1="-2" x2="7" y2="100" z2="20" type="air" />            <!-- limits of our arena -->
-        <DrawCuboid x1="-2" y1="45" z1="-2" x2="7" y2="45" z2="20" type="lava" />           <!-- lava floor -->
+        <DrawCuboid x1="-4" y1="46" z1="-2" x2="9" y2="100" z2="24" type="air" />            <!-- limits of our arena -->
+        <DrawCuboid x1="-4" y1="45" z1="-2" x2="9" y2="45" z2="24" type="lava" />           <!-- lava floor -->
+
+
+
         <DrawBlock x="-1"  y="45" z="1" type="cobblestone" />    <!-- the starting marker -->
         <DrawBlock x="-1" y ="45" z ="2" type="sandstone" />
 
@@ -60,12 +63,12 @@
 
       <!-- code below sets the rewards -->
       <RewardForTouchingBlockType>
-        <Block reward="-50.0" type="lava" behaviour="onceOnly"/>
+        <Block reward="-100.0" type="lava" behaviour="onceOnly"/>
         <Block reward="100.0" type="lapis_block" behaviour="onceOnly"/>
-        <Block reward= "50"   type="sandstone" behaviour="oncePerBlock"/>
+        <Block reward= "2"   type="sandstone" behaviour="oncePerBlock"/>
       </RewardForTouchingBlockType>
 
-      <RewardForSendingCommand reward="-10" />
+      <RewardForSendingCommand reward="-5" />
 
       <!-- when do we quite programs -->
       <AgentQuitFromTouchingBlockType>
