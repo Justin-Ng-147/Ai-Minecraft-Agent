@@ -297,6 +297,7 @@ class TabQAgent(object):
 
         action_inset = 0.1
         action_radius = 0.1
+        action_offset = .4
         curr_radius = 0.2
 
         
@@ -310,8 +311,8 @@ class TabQAgent(object):
                 self.canvas.create_rectangle( x*scale, y*scale, (x+1)*scale, (y+1)*scale, outline="#fff", fill="#000")
 
                 if self.actions == ["moves", "movew", "movee","jumps", "jumpw", "jumpe"]:
-                    flat_action_positions = [ ( 0.25, 1-action_inset ), ( action_inset, 0.25 ), ( 1-action_inset, 0.25 ) ]
-                    jump_action_postitions = [ (.75, 1-action_inset), (action_inset, .75), (1-action_inset, .75) ]
+                    flat_action_positions = [ ( action_offset, 1-action_inset ), ( action_inset, action_offset ), ( 1-action_inset, action_offset ) ]
+                    jump_action_postitions = [ (1-action_offset, 1-action_inset), (action_inset, 1-action_offset), (1-action_inset, 1-action_offset) ]
 
                     for action in range(6):
                         if not s in self.q_table:
@@ -327,12 +328,24 @@ class TabQAgent(object):
                                                     (x + flat_action_positions[action][0] + action_radius ) *scale,
                                                     (y + flat_action_positions[action][1] + action_radius ) *scale, 
                                                     outline=color_string, fill=color_string )
-                        elif action >= 3:
+                        elif action == 3:
                             self.canvas.create_line((x+jump_action_postitions[action-3][0])*scale,
                                                     (y+jump_action_postitions[action-3][1]+action_radius)*scale,
                                                     (x+jump_action_postitions[action-3][0])*scale,
                                                     (y+jump_action_postitions[action-3][1]-action_radius)*scale,
+                                                    fill=color_string, arrow=tk.FIRST)
+                        elif action == 4:
+                            self.canvas.create_line((x+jump_action_postitions[action-3][0]+action_radius)*scale,
+                                                    (y+jump_action_postitions[action-3][1])*scale,
+                                                    (x+jump_action_postitions[action-3][0]-action_radius)*scale,
+                                                    (y+jump_action_postitions[action-3][1])*scale,
                                                     fill=color_string, arrow=tk.LAST)
+                        elif action == 5:
+                            self.canvas.create_line((x+jump_action_postitions[action-3][0]+action_radius)*scale,
+                                                    (y+jump_action_postitions[action-3][1])*scale,
+                                                    (x+jump_action_postitions[action-3][0]-action_radius)*scale,
+                                                    (y+jump_action_postitions[action-3][1])*scale,
+                                                    fill=color_string, arrow=tk.FIRST)
 
         if curr_x is not None and curr_y is not None:
             self.canvas.create_oval( (curr_x + 0.5 - curr_radius ) * scale, 
