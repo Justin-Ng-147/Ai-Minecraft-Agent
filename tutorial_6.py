@@ -177,7 +177,7 @@ class TabQAgent(object):
             self.logger.info("Random action: %s" % self.actions[a])
         else:
             m = max(self.q_table[current_s])
-            self.logger.info("Current values: %s" % ",".join(str(x) for x in self.q_table[current_s]))
+            self.logger.info("Current values(%s): %s" % (current_s, ",".join(str(x) for x in self.q_table[current_s])))
             self.logger.info(self.actions)
             l = list()
             for x in range(0, len(self.actions)):
