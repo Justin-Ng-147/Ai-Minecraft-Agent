@@ -284,9 +284,10 @@ class TabQAgent(object):
     def drawQ( self, curr_x=None, curr_y=None ):
         scale = 40
         # how big the q table is
-        world_x = 6
-        world_y = 14
-
+        world_x = 13
+        world_y = 26
+        x_offset = 3
+        y_offset = 1
         if self.canvas is None or self.root is None:
             self.root = tk.Tk()
             self.root.wm_title("Q-table")
@@ -294,64 +295,58 @@ class TabQAgent(object):
             self.canvas.grid()
             self.root.update()
         self.canvas.delete("all")
-
         action_inset = 0.1
         action_radius = 0.1
         action_offset = .4
         curr_radius = 0.2
-
-        
-
         # (NSWE to match action order)
         min_value = -20
         max_value = 20
         for x in range(world_x):
+            ax = x + x_offset
             for y in range(world_y):
+                ay = y +y_offset
                 s = "%d:%d" % (x,y)
-                self.canvas.create_rectangle( x*scale, y*scale, (x+1)*scale, (y+1)*scale, outline="#fff", fill="#000")
-
+                self.canvas.create_rectangle( x*scale, y*scale, (x+1)*scale, (y+1)*scale, outline="#fff", fill="")
                 if self.actions == ["moves", "movew", "movee","jumps", "jumpw", "jumpe"]:
                     flat_action_positions = [ ( action_offset, 1-action_inset ), ( action_inset, action_offset ), ( 1-action_inset, action_offset ) ]
                     jump_action_postitions = [ (1-action_offset, 1-action_inset), (action_inset, 1-action_offset), (1-action_inset, 1-action_offset) ]
-
                     for action in range(6):
                         if not s in self.q_table:
                             continue
-
                         value = self.q_table[s][action]
                         color = int( 255 * ( value - min_value ) / ( max_value - min_value )) # map value to 0-255
                         color = max( min( color, 255 ), 0 ) # ensure within [0,255]
                         color_string = '#%02x%02x%02x' % (255-color, color, 0)
                         if action < 3:
-                            self.canvas.create_oval( (x + flat_action_positions[action][0] - action_radius ) *scale,
-                                                    (y + flat_action_positions[action][1] - action_radius ) *scale,
-                                                    (x + flat_action_positions[action][0] + action_radius ) *scale,
-                                                    (y + flat_action_positions[action][1] + action_radius ) *scale, 
+                            self.canvas.create_oval((ax + flat_action_positions[action][0] - action_radius) *scale,
+                                                    (ay + flat_action_positions[action][1] - action_radius) *scale,
+                                                    (ax + flat_action_positions[action][0] + action_radius) *scale,
+                                                    (ay + flat_action_positions[action][1] + action_radius) *scale, 
                                                     outline=color_string, fill=color_string )
                         elif action == 3:
-                            self.canvas.create_line((x+jump_action_postitions[action-3][0])*scale,
-                                                    (y+jump_action_postitions[action-3][1]+action_radius)*scale,
-                                                    (x+jump_action_postitions[action-3][0])*scale,
-                                                    (y+jump_action_postitions[action-3][1]-action_radius)*scale,
+                            self.canvas.create_line((ax+jump_action_postitions[action-3][0])*scale,
+                                                    (ay+jump_action_postitions[action-3][1]+action_radius)*scale,
+                                                    (ax+jump_action_postitions[action-3][0])*scale,
+                                                    (ay+jump_action_postitions[action-3][1]-action_radius)*scale,
                                                     fill=color_string, arrow=tk.FIRST)
                         elif action == 4:
-                            self.canvas.create_line((x+jump_action_postitions[action-3][0]+action_radius)*scale,
-                                                    (y+jump_action_postitions[action-3][1])*scale,
-                                                    (x+jump_action_postitions[action-3][0]-action_radius)*scale,
-                                                    (y+jump_action_postitions[action-3][1])*scale,
+                            self.canvas.create_line((ax+jump_action_postitions[action-3][0]+action_radius)*scale,
+                                                    (ay+jump_action_postitions[action-3][1])*scale,
+                                                    (ax+jump_action_postitions[action-3][0]-action_radius)*scale,
+                                                    (ay+jump_action_postitions[action-3][1])*scale,
                                                     fill=color_string, arrow=tk.LAST)
                         elif action == 5:
-                            self.canvas.create_line((x+jump_action_postitions[action-3][0]+action_radius)*scale,
-                                                    (y+jump_action_postitions[action-3][1])*scale,
-                                                    (x+jump_action_postitions[action-3][0]-action_radius)*scale,
-                                                    (y+jump_action_postitions[action-3][1])*scale,
-                                                    fill=color_string, arrow=tk.FIRST)
-
+                            self.canvas.create_line((ax+jump_action_postitions[action-3][0]+action_radius)*scale,
+                                                    (ay+jump_action_postitions[action-3][1])*scale,
+                                                    (ax+jump_action_postitions[action-3][0]-action_radius)*scale,
+                                                    (ay+jump_action_postitions[action-3][1])*scale,
+                                                    fill=color_string, arrow=tk.FIRST)  
         if curr_x is not None and curr_y is not None:
-            self.canvas.create_oval( (curr_x + 0.5 - curr_radius ) * scale, 
-                                     (curr_y + 0.5 - curr_radius ) * scale, 
-                                     (curr_x + 0.5 + curr_radius ) * scale, 
-                                     (curr_y + 0.5 + curr_radius ) * scale, 
+            self.canvas.create_oval( (curr_x + 0.5 - curr_radius +x_offset) * scale, 
+                                     (curr_y + 0.5 - curr_radius +y_offset) * scale, 
+                                     (curr_x + 0.5 + curr_radius +x_offset) * scale, 
+                                     (curr_y + 0.5 + curr_radius +y_offset) * scale, 
                                      outline="#fff", fill="#fff" )
         self.root.update()
 
