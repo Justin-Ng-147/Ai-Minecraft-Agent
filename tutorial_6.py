@@ -64,14 +64,14 @@ class TabQAgent(object):
         # possible actions migh need to change it to move turnleft turn right and jump
 
         # add 4 more actions jump up 1 move 2 for nesw
-        self.actions = ["moven", "movew", "movee","jumpn", "jumpw", "jumpe"]
+        self.actions = ["moves", "movew", "movee","jumps", "jumpw", "jumpe"]
 
         self.q_table = {}
         self.canvas = None
         self.root = None
     def move(self, move: str):
-        time.sleep(0.3)
-        if move == "moven":
+        # time.sleep(0.3)
+        if move == "moves":
             # north
             agent_host.sendCommand("move 1"  )
         elif move =="movee":
@@ -87,11 +87,13 @@ class TabQAgent(object):
         elif move == "jumpn":
             # j n
             agent_host.sendCommand("jump 1")
+            agent_host.sendCommand("jump 1")
             agent_host.sendCommand("move 1"  )
             agent_host.sendCommand("jump 1")
             agent_host.sendCommand("move 1"  )
         elif move =="jumpe":
             # j e
+            agent_host.sendCommand("jump 1")
             agent_host.sendCommand("jump 1")
             agent_host.sendCommand("moveeast 1"  )
             agent_host.sendCommand("jump 1")
@@ -99,11 +101,13 @@ class TabQAgent(object):
         elif move =="jumps":
             # j s
             agent_host.sendCommand("jump 1")
+            agent_host.sendCommand("jump 1")
             agent_host.sendCommand("move 1"  )
             agent_host.sendCommand("jump 1")
             agent_host.sendCommand("move 1"  )
         elif move =="jumpw":
             # j w
+            agent_host.sendCommand("jump 1")
             agent_host.sendCommand("jump 1")
             agent_host.sendCommand("movewest 1"  )
             agent_host.sendCommand("jump 1")
@@ -177,7 +181,7 @@ class TabQAgent(object):
             self.logger.info("Random action: %s" % self.actions[a])
         else:
             m = max(self.q_table[current_s])
-            self.logger.info("Current values: %s" % ",".join(str(x) for x in self.q_table[current_s]))
+            self.logger.info("Current values(%s): %s" % (current_s, ",".join(str(x) for x in self.q_table[current_s])))
             self.logger.info(self.actions)
             l = list()
             for x in range(0, len(self.actions)):
@@ -233,7 +237,7 @@ class TabQAgent(object):
             if is_first_action:
                 # wait until have received a valid observation
                 while True:
-                    time.sleep(0.3)
+                    time.sleep(1)
                     world_state = agent_host.getWorldState()
 
                     for error in world_state.errors:
@@ -249,7 +253,7 @@ class TabQAgent(object):
             else:
                 # wait for non-zero reward
                 while world_state.is_mission_running and current_r > 1:
-                    time.sleep(0.3)
+                    time.sleep(1)
                     world_state = agent_host.getWorldState()
                     for error in world_state.errors:
                         self.logger.error("Error: %s" % error.text)
@@ -257,7 +261,7 @@ class TabQAgent(object):
                         current_r += reward.getValue()
                 # allow time to stabilise after action
                 while True:
-                    time.sleep(0.3)
+                    time.sleep(1)
                     world_state = agent_host.getWorldState()
                     for error in world_state.errors:
                         self.logger.error("Error: %s" % error.text)
@@ -284,9 +288,10 @@ class TabQAgent(object):
     def drawQ( self, curr_x=None, curr_y=None ):
         scale = 40
         # how big the q table is
-        world_x = 6
-        world_y = 14
-
+        world_x = 13
+        world_y = 26
+        x_offset = 3
+        y_offset = 1
         if self.canvas is None or self.root is None:
             self.root = tk.Tk()
             self.root.wm_title("Q-table")
@@ -294,38 +299,58 @@ class TabQAgent(object):
             self.canvas.grid()
             self.root.update()
         self.canvas.delete("all")
-
         action_inset = 0.1
         action_radius = 0.1
+        action_offset = .4
         curr_radius = 0.2
-        # action_position need to add 4 more for jump
-        action_positions = [ ( 0.5, action_inset ), ( 0.5, 1-action_inset ), ( action_inset, 0.5 ), ( 1-action_inset, 0.5 ) ]
-
         # (NSWE to match action order)
         min_value = -20
         max_value = 20
-        for x in range(world_x):
-            for y in range(world_y):
+        for x in range(-4,10):
+            ax = x + x_offset
+            for y in range(-2,25):
+                ay = y +y_offset
                 s = "%d:%d" % (x,y)
-                self.canvas.create_rectangle( x*scale, y*scale, (x+1)*scale, (y+1)*scale, outline="#fff", fill="#000")
-                for action in range(4):
-                    if not s in self.q_table:
-                        continue
-
-                    value = self.q_table[s][action]
-                    color = int( 255 * ( value - min_value ) / ( max_value - min_value )) # map value to 0-255
-                    color = max( min( color, 255 ), 0 ) # ensure within [0,255]
-                    color_string = '#%02x%02x%02x' % (255-color, color, 0)
-                    self.canvas.create_oval( (x + action_positions[action][0] - action_radius ) *scale,
-                                             (y + action_positions[action][1] - action_radius ) *scale,
-                                             (x + action_positions[action][0] + action_radius ) *scale,
-                                             (y + action_positions[action][1] + action_radius ) *scale, 
-                                             outline=color_string, fill=color_string )
+                self.canvas.create_rectangle( ax*scale, ay*scale, (ax+1)*scale, (ay+1)*scale, outline="#fff", fill="")
+                if self.actions == ["moves", "movew", "movee","jumps", "jumpw", "jumpe"]:
+                    flat_action_positions = [ ( action_offset, 1-action_inset ), ( action_inset, action_offset ), ( 1-action_inset, action_offset ) ]
+                    jump_action_postitions = [ (1-action_offset, 1-action_inset), (action_inset, 1-action_offset), (1-action_inset, 1-action_offset) ]
+                    for action in range(6):
+                        if not s in self.q_table:
+                            continue
+                        value = self.q_table[s][action]
+                        color = int( 255 * ( value - min_value ) / ( max_value - min_value )) # map value to 0-255
+                        color = max( min( color, 255 ), 0 ) # ensure within [0,255]
+                        color_string = '#%02x%02x%02x' % (255-color, color, 0)
+                        if action < 3:
+                            self.canvas.create_oval((ax + flat_action_positions[action][0] - action_radius) *scale,
+                                                    (ay + flat_action_positions[action][1] - action_radius) *scale,
+                                                    (ax + flat_action_positions[action][0] + action_radius) *scale,
+                                                    (ay + flat_action_positions[action][1] + action_radius) *scale, 
+                                                    outline=color_string, fill=color_string )
+                        elif action == 3:
+                            self.canvas.create_line((ax+jump_action_postitions[action-3][0])*scale,
+                                                    (ay+jump_action_postitions[action-3][1]+action_radius)*scale,
+                                                    (ax+jump_action_postitions[action-3][0])*scale,
+                                                    (ay+jump_action_postitions[action-3][1]-action_radius)*scale,
+                                                    fill=color_string, arrow=tk.FIRST)
+                        elif action == 4:
+                            self.canvas.create_line((ax+jump_action_postitions[action-3][0]+action_radius)*scale,
+                                                    (ay+jump_action_postitions[action-3][1])*scale,
+                                                    (ax+jump_action_postitions[action-3][0]-action_radius)*scale,
+                                                    (ay+jump_action_postitions[action-3][1])*scale,
+                                                    fill=color_string, arrow=tk.LAST)
+                        elif action == 5:
+                            self.canvas.create_line((ax+jump_action_postitions[action-3][0]+action_radius)*scale,
+                                                    (ay+jump_action_postitions[action-3][1])*scale,
+                                                    (ax+jump_action_postitions[action-3][0]-action_radius)*scale,
+                                                    (ay+jump_action_postitions[action-3][1])*scale,
+                                                    fill=color_string, arrow=tk.FIRST)  
         if curr_x is not None and curr_y is not None:
-            self.canvas.create_oval( (curr_x + 0.5 - curr_radius ) * scale, 
-                                     (curr_y + 0.5 - curr_radius ) * scale, 
-                                     (curr_x + 0.5 + curr_radius ) * scale, 
-                                     (curr_y + 0.5 + curr_radius ) * scale, 
+            self.canvas.create_oval( (curr_x + 0.5 - curr_radius +x_offset) * scale, 
+                                     (curr_y + 0.5 - curr_radius +y_offset) * scale, 
+                                     (curr_x + 0.5 + curr_radius +x_offset) * scale, 
+                                     (curr_y + 0.5 + curr_radius +y_offset) * scale, 
                                      outline="#fff", fill="#fff" )
         self.root.update()
 
