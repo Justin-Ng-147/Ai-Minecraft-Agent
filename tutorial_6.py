@@ -70,7 +70,7 @@ class TabQAgent(object):
         self.canvas = None
         self.root = None
     def move(self, move: str):
-        time.sleep(0.3)
+        # time.sleep(0.3)
         if move == "moves":
             # north
             agent_host.sendCommand("move 1"  )
@@ -87,11 +87,13 @@ class TabQAgent(object):
         elif move == "jumpn":
             # j n
             agent_host.sendCommand("jump 1")
+            agent_host.sendCommand("jump 1")
             agent_host.sendCommand("move 1"  )
             agent_host.sendCommand("jump 1")
             agent_host.sendCommand("move 1"  )
         elif move =="jumpe":
             # j e
+            agent_host.sendCommand("jump 1")
             agent_host.sendCommand("jump 1")
             agent_host.sendCommand("moveeast 1"  )
             agent_host.sendCommand("jump 1")
@@ -99,11 +101,13 @@ class TabQAgent(object):
         elif move =="jumps":
             # j s
             agent_host.sendCommand("jump 1")
+            agent_host.sendCommand("jump 1")
             agent_host.sendCommand("move 1"  )
             agent_host.sendCommand("jump 1")
             agent_host.sendCommand("move 1"  )
         elif move =="jumpw":
             # j w
+            agent_host.sendCommand("jump 1")
             agent_host.sendCommand("jump 1")
             agent_host.sendCommand("movewest 1"  )
             agent_host.sendCommand("jump 1")
@@ -233,7 +237,7 @@ class TabQAgent(object):
             if is_first_action:
                 # wait until have received a valid observation
                 while True:
-                    time.sleep(0.3)
+                    time.sleep(1)
                     world_state = agent_host.getWorldState()
 
                     for error in world_state.errors:
@@ -249,7 +253,7 @@ class TabQAgent(object):
             else:
                 # wait for non-zero reward
                 while world_state.is_mission_running and current_r > 1:
-                    time.sleep(0.3)
+                    time.sleep(1)
                     world_state = agent_host.getWorldState()
                     for error in world_state.errors:
                         self.logger.error("Error: %s" % error.text)
@@ -257,7 +261,7 @@ class TabQAgent(object):
                         current_r += reward.getValue()
                 # allow time to stabilise after action
                 while True:
-                    time.sleep(0.3)
+                    time.sleep(1)
                     world_state = agent_host.getWorldState()
                     for error in world_state.errors:
                         self.logger.error("Error: %s" % error.text)
@@ -302,12 +306,12 @@ class TabQAgent(object):
         # (NSWE to match action order)
         min_value = -20
         max_value = 20
-        for x in range(world_x):
+        for x in range(-4,10):
             ax = x + x_offset
-            for y in range(world_y):
+            for y in range(-2,25):
                 ay = y +y_offset
                 s = "%d:%d" % (x,y)
-                self.canvas.create_rectangle( x*scale, y*scale, (x+1)*scale, (y+1)*scale, outline="#fff", fill="")
+                self.canvas.create_rectangle( ax*scale, ay*scale, (ax+1)*scale, (ay+1)*scale, outline="#fff", fill="")
                 if self.actions == ["moves", "movew", "movee","jumps", "jumpw", "jumpe"]:
                     flat_action_positions = [ ( action_offset, 1-action_inset ), ( action_inset, action_offset ), ( 1-action_inset, action_offset ) ]
                     jump_action_postitions = [ (1-action_offset, 1-action_inset), (action_inset, 1-action_offset), (1-action_inset, 1-action_offset) ]
