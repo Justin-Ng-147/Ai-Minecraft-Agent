@@ -60,6 +60,7 @@ class TabQAgent(object):
             self.logger.setLevel(logging.INFO)
         self.logger.handlers = []
         self.logger.addHandler(logging.StreamHandler(sys.stdout))
+        self.reward = 0 #haley change
 
         # possible actions migh need to change it to move turnleft turn right and jump
 
@@ -70,6 +71,10 @@ class TabQAgent(object):
         self.canvas = None
         self.root = None
     def move(self, move: str):
+
+        # check if we have already moved to said spot if yes add -20 penalty
+        # we can do this by checking if state already exists in q_table
+
         # time.sleep(0.3)
         if move == "moves":
             # north
@@ -137,8 +142,8 @@ class TabQAgent(object):
         new_q = reward
         
         # assign the new action value to the Q-table
-        # if old_q == 0 or new_q> old_q:
-        self.q_table[self.prev_s][self.prev_a] = new_q
+        if old_q == 0 or new_q> old_q:
+            self.q_table[self.prev_s][self.prev_a] = new_q
         
     def updateQTableFromTerminatingState( self, reward ):
         """Change q_table to reflect what we have learnt, after reaching a terminal state."""
@@ -162,7 +167,8 @@ class TabQAgent(object):
         if not u'XPos' in obs or not u'ZPos' in obs:
             self.logger.error("Incomplete observation received: %s" % obs_text)
             return 0
-        current_s = "%d:%d" % (int(obs[u'XPos']), int(obs[u'ZPos']))
+        #changes::::: changed ints to float so we can move right :::::::
+        current_s = "%f:%f" % (obs[u'XPos'], obs[u'ZPos'])
         self.logger.debug("State: %s (x = %.2f, z = %.2f)" % (current_s, float(obs[u'XPos']), float(obs[u'ZPos'])))
         if current_s not in self.q_table:
             self.q_table[current_s] = ([0] * len(self.actions))
@@ -180,11 +186,30 @@ class TabQAgent(object):
             a = random.randint(0, len(self.actions) - 1)
             self.logger.info("Random action: %s" % self.actions[a])
         else:
+            # checking for max val on q table
             m = max(self.q_table[current_s])
+
+            #changes::::: hard codes for more punishment for reaching same block:::::::
+            if m == -5:
+                for x in range(0,len(self.actions)):
+                    if self.q_table[current_s][x] ==m:
+                        self.q_table[current_s][x] -= 100
+                m = max(self.q_table[current_s])
+            elif m == -25:
+                for x in range(0,len(self.actions)):
+                    if self.q_table[current_s][x] ==m:
+                        self.q_table[current_s][x] -= 100
+                m = max(self.q_table[current_s])
+
             self.logger.info("Current values(%s): %s" % (current_s, ",".join(str(x) for x in self.q_table[current_s])))
+            self.logger.info("OBS observations ---------------")
+            self.logger.info(obs)
+            self.logger.info("--------------------------------")
             self.logger.info(self.actions)
             l = list()
+            # for all possible acttions
             for x in range(0, len(self.actions)):
+                # if that action have max val that is the selected move
                 if self.q_table[current_s][x] == m:
                     l.append(x)
             y = random.randint(0, len(l)-1)
@@ -231,7 +256,8 @@ class TabQAgent(object):
         while world_state.is_mission_running:
             
             # start reward being 0
-            current_r = 0
+            #current_r = 0
+            self.reward = 0
             
             #if first move
             if is_first_action:
@@ -243,22 +269,22 @@ class TabQAgent(object):
                     for error in world_state.errors:
                         self.logger.error("Error: %s" % error.text)
                     for reward in world_state.rewards:
-                        current_r += reward.getValue()
+                        self.reward += reward.getValue()
                     if world_state.is_mission_running and len(world_state.observations)>0 and not world_state.observations[-1].text=="{}":
-                        total_reward += self.act(world_state, agent_host, current_r)
+                        total_reward += self.act(world_state, agent_host, self.reward)
                         break
                     if not world_state.is_mission_running:
                         break
                 is_first_action = False
             else:
                 # wait for non-zero reward
-                while world_state.is_mission_running and current_r > 1:
+                while world_state.is_mission_running and self.reward > 1:
                     time.sleep(1)
                     world_state = agent_host.getWorldState()
                     for error in world_state.errors:
                         self.logger.error("Error: %s" % error.text)
                     for reward in world_state.rewards:
-                        current_r += reward.getValue()
+                        self.reward += reward.getValue()
                 # allow time to stabilise after action
                 while True:
                     time.sleep(1)
@@ -266,20 +292,20 @@ class TabQAgent(object):
                     for error in world_state.errors:
                         self.logger.error("Error: %s" % error.text)
                     for reward in world_state.rewards:
-                        current_r += reward.getValue()
+                        self.reward += reward.getValue()
                     if world_state.is_mission_running and len(world_state.observations)>0 and not world_state.observations[-1].text=="{}":
-                        total_reward += self.act(world_state, agent_host, current_r)
+                        total_reward += self.act(world_state, agent_host, self.reward)
                         break
                     if not world_state.is_mission_running:
                         break
 
         # process final reward
-        self.logger.debug("Final reward: %d" % current_r)
-        total_reward += current_r
+        self.logger.debug("Final reward: %d" % self.reward)
+        total_reward += self.reward
 
         # update Q values
         if self.prev_s is not None and self.prev_a is not None:
-            self.updateQTableFromTerminatingState( current_r )
+            self.updateQTableFromTerminatingState( self.reward )
             
         self.drawQ()
     

@@ -35,12 +35,7 @@
         <DrawBlock x="2"  y="48" z="18" type="sandstone" />
 
         <DrawBlock x="2"  y="48" z="20" type="sandstone" />
-        <DrawBlock x="2"  y="48" z="22" type="sandstone" />
-        <DrawBlock x="3"  y="48" z="24" type="sandstone" />
-        <DrawBlock x="5"  y="48" z="24" type="sandstone" />
-       <DrawCuboid x1="5" y1= "48" z1 ="26" x2="7" y2="48" z2="26" type="sandstone" />
-       <DrawBlock x="6"  y="48" z="28" type="sandstone" />
-       <DrawBlock x="6"  y="48" z="30" type="lapis_block" />
+        <DrawBlock x="2"  y="48" z="22" type="lapis_block" />
       </DrawingDecorator>
       <ServerQuitFromTimeUp timeLimitMs="20000"/>
       <ServerQuitWhenAnyAgentFinishes/>
@@ -48,7 +43,7 @@
   </ServerSection>
 
   <AgentSection mode="Survival">
-    <Name>Cristina</Name>
+    <Name>Agent1</Name>
 
     <!-- where to start our agent -->
     <AgentStart>
