@@ -62,6 +62,10 @@ class TabQAgent(object):
         self.logger.addHandler(logging.StreamHandler(sys.stdout))
         self.reward = 0 #haley change
 
+
+        self._MOVE_COST = -5
+        self._JUMP_COST = -5
+
         # possible actions migh need to change it to move turnleft turn right and jump
 
         # add 4 more actions jump up 1 move 2 for nesw
@@ -95,9 +99,9 @@ class TabQAgent(object):
             # j npi
             agent_host.sendCommand("jump 1")
             agent_host.sendCommand("jump 1")
-            agent_host.sendCommand("move 1"  )
+            agent_host.sendCommand("move 1")
             agent_host.sendCommand("jump 1")
-            agent_host.sendCommand("move 1"  )
+            agent_host.sendCommand("move 1")
         elif move =="jumpe":
             # j e
             agent_host.sendCommand("jump 1")
@@ -122,17 +126,32 @@ class TabQAgent(object):
         
 
     # create json files
-    def save_q_table(self,q_table):
+    def save_q_table(self,q_table, map = 1):
         # change file name if needed
-        filename = "q_table.json"
+        filename = ''
+        if map == 1:
+            filename = "q_table1.json"
+        elif map == 2:
+            filename = "q_table2.json"
+        elif map == 3:
+            filename = "q_table3.json"
         with open(filename, 'w') as f:
             f.write(json.dumps(q_table))
 
     # load json files
-    def load_q_table(self):
-        print("Loading current q t:")
-        q_file = open(r"q_table.json")
-        self.q_table= json.load(q_file)
+    def load_q_table(self, map = 1):
+        if map == 1:
+            print("Loading current q t:")
+            q_file = open(r"q_table1.json")
+            self.q_table= json.load(q_file)
+        elif map == 2:
+            print("Loading current q t:")
+            q_file = open(r"q_table2.json")
+            self.q_table= json.load(q_file)
+        elif map == 3:
+            print("Loading current q t:")
+            q_file = open(r"q_table3.json")
+            self.q_table= json.load(q_file)
 
     def updateQTable( self, reward, current_state ):
         """Change q_table to reflect what we have learnt."""
@@ -162,7 +181,6 @@ class TabQAgent(object):
         
     def act(self, world_state, agent_host, current_r ):
         """take 1 action in response to the current world state"""
-        
         obs_text = world_state.observations[-1].text
         obs = json.loads(obs_text) # most recent observation
         self.logger.debug(obs)
@@ -184,7 +202,7 @@ class TabQAgent(object):
             self.updateQTable( current_r, current_s )
 
         # drawing the q table
-        self.drawQ( curr_x = int(obs[u'XPos']), curr_y = int(obs[u'ZPos']) )
+        self.drawQ( curr_x = float(obs[u'XPos']), curr_y = float(obs[u'ZPos']) )
 
         # select the next action
         rnd = random.random()
@@ -196,17 +214,19 @@ class TabQAgent(object):
             m = max(self.q_table[current_s])
 
              #changes::::: hard codes for more punishment for reaching same block:::::::
-            if m == -5:
+            if m == self._MOVE_COST: #moving to a block it already has been to 
                 for x in range(0,len(self.actions)):
-                    if self.q_table[current_s][x] ==m:
+                    if self.q_table[current_s][x] == m:
                         self.q_table[current_s][x] -= 100
                 m = max(self.q_table[current_s])
-            elif m == -25:
+                
+            elif m == self._JUMP_COST: #jumping to a block it already has been to
                 for x in range(0,len(self.actions)):
-                    if self.q_table[current_s][x] ==m:
+                    if self.q_table[current_s][x] == m:
                         self.q_table[current_s][x] -= 100
                 m = max(self.q_table[current_s])
             
+            # grab list of actions and if that action already appeared during this, add penalty
             self.logger.info("Current values(%s): %s" % (current_s, ",".join(str(x) for x in self.q_table[current_s])))
             self.logger.info("OBS observations ---------------")
             self.logger.info(obs)
@@ -318,8 +338,8 @@ class TabQAgent(object):
         # how big the q table is
         world_x = 13
         world_y = 26
-        x_offset = 3
-        y_offset = 1
+        x_offset = 4
+        y_offset = 2
         if self.canvas is None or self.root is None:
             self.root = tk.Tk()
             self.root.wm_title("Q-table")
@@ -338,7 +358,7 @@ class TabQAgent(object):
             ax = x + x_offset
             for y in range(-2,25):
                 ay = y +y_offset
-                s = "%d:%d" % (x,y)
+                s = "%f:%f" % (x+0.5,y+0.5)
                 self.canvas.create_rectangle( ax*scale, ay*scale, (ax+1)*scale, (ay+1)*scale, outline="#fff", fill="")
                 if self.actions == ["moves", "movew", "movee","jumps", "jumpw", "jumpe"]:
                     flat_action_positions = [ ( action_offset, 1-action_inset ), ( action_inset, action_offset ), ( 1-action_inset, action_offset ) ]
@@ -375,10 +395,10 @@ class TabQAgent(object):
                                                     (ay+jump_action_postitions[action-3][1])*scale,
                                                     fill=color_string, arrow=tk.FIRST)  
         if curr_x is not None and curr_y is not None:
-            self.canvas.create_oval( (curr_x + 0.5 - curr_radius +x_offset) * scale, 
-                                     (curr_y + 0.5 - curr_radius +y_offset) * scale, 
-                                     (curr_x + 0.5 + curr_radius +x_offset) * scale, 
-                                     (curr_y + 0.5 + curr_radius +y_offset) * scale, 
+            self.canvas.create_oval( (curr_x - curr_radius +x_offset) * scale, 
+                                     (curr_y - curr_radius +y_offset) * scale, 
+                                     (curr_x + curr_radius +x_offset) * scale, 
+                                     (curr_y + curr_radius +y_offset) * scale, 
                                      outline="#fff", fill="#fff" )
         self.root.update()
 
@@ -391,9 +411,12 @@ else:
 agent = TabQAgent()
 agent_host = MalmoPython.AgentHost()
 
+# asking user which map to load
+map = int(input("What map to load? (1: easy) (2: medium) (3: hard): "))
 # loading q table
 if input("load q table?") == "Yes":
-    agent.load_q_table()
+
+    agent.load_q_table(map)
     print("loaded q table")
     print(agent.q_table)
 
@@ -408,7 +431,15 @@ if agent_host.receivedArgument("help"):
     exit(0)
 
 # -- set up the mission -- #
-mission_file = './175easy.xml'
+mission_file= ""
+
+if map == 1:
+    mission_file = './175easy.xml'
+elif map == 2:
+    mission_file = './175medium.xml'
+elif map == 3:
+    mission_file = './175hard.xml'
+
 
 with open(mission_file, 'r') as f:
     print("Loading mission from %s" % mission_file)
@@ -426,7 +457,7 @@ max_retries = 3
 if agent_host.receivedArgument("test"):
     num_repeats = 1
 else:
-    num_repeats = 250
+    num_repeats = 80
 
 cumulative_rewards = []
 for i in range(num_repeats):
@@ -464,7 +495,7 @@ for i in range(num_repeats):
     # -- clean up -- #
     time.sleep(0.5) # (let the Mod reset)
 
-agent.save_q_table(agent.q_table)
+agent.save_q_table(agent.q_table, map)
 print("Done.")
 print()
 print("Cumulative rewards for all %d runs:" % num_repeats)

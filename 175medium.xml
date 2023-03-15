@@ -28,7 +28,7 @@
 
 
         <DrawBlock x="0"  y="47" z="12" type="sandstone" />    
-        <DrawBlock x="0"  y="47" z="14" type="stone" /> <!-- the checkpoint marker -->
+        <DrawBlock x="0"  y="47" z="14" type="sandstone" /> 
         <DrawBlock x="0"  y="48" z="16" type="sandstone" />
 
         <DrawBlock x="2"  y="48" z="16" type="sandstone" />
@@ -59,7 +59,7 @@
       <!-- code below sets the rewards -->
       <RewardForTouchingBlockType>
         <Block reward="-100.0" type="lava" behaviour="onceOnly"/>
-        <Block reward="100.0" type="lapis_block" behaviour="onceOnly"/>
+        <Block reward="1000.0" type="lapis_block" behaviour="onceOnly"/>
         <Block reward= "2"   type="sandstone" behaviour="oncePerBlock"/>
       </RewardForTouchingBlockType>
 
