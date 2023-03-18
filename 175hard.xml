@@ -13,8 +13,8 @@
       <FlatWorldGenerator generatorString="3;7,220*1,5*3,2;3;,biome_1"/>
       <DrawingDecorator>
         <!-- coordinates for cuboid are inclusive -->
-        <DrawCuboid x1="-2" y1="46" z1="-2" x2="7" y2="100" z2="60" type="air" />            <!-- limits of our arena -->
-        <DrawCuboid x1="-2" y1="45" z1="-2" x2="7" y2="45" z2="60 " type="lava" />           <!-- lava floor -->
+        <DrawCuboid x1="-3" y1="46" z1="-2" x2="8" y2="100" z2="60" type="air" />            <!-- limits of our arena -->
+        <DrawCuboid x1="-3" y1="45" z1="-2" x2="8" y2="45" z2="60 " type="lava" />           <!-- lava floor -->
         <DrawBlock x="-1"  y="45" z="1" type="cobblestone" />    <!-- the starting marker -->
         <DrawCuboid x1="-1" y1= "45" z1 ="2" x2="-1" y2="45" z2="8" type="sandstone" />
 
