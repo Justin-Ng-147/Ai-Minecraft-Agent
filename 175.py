@@ -74,6 +74,8 @@ class TabQAgent(object):
         self.q_table = {}
         self.canvas = None
         self.root = None
+        self.frame = None
+        self.scrollbar = None
     def move(self, move: str):
 
 
@@ -334,17 +336,42 @@ class TabQAgent(object):
         return total_reward
         
     def drawQ( self, curr_x=None, curr_y=None ):
-        scale = 40
         # how big the q table is
-        world_x = 13
-        world_y = 26
-        x_offset = 4
-        y_offset = 2
+        if(map == 1 or map ==2):
+            scale = 40
+            world_x = 13
+            world_y = 26
+            x_offset = 4
+            y_offset = 2
+            start_x = -4
+            start_y = -2
+        elif(map == 3):
+            scale = 30
+            world_x = 11
+            world_y = 62
+            x_offset = 3
+            y_offset = 0
+            start_x = -3
+            start_y = -2
+
         if self.canvas is None or self.root is None:
             self.root = tk.Tk()
             self.root.wm_title("Q-table")
-            self.canvas = tk.Canvas(self.root, width=world_x*scale, height=world_y*scale, borderwidth=0, highlightthickness=0, bg="black")
+            self.canvas = tk.Canvas(self.root,
+                                    width=world_x*scale,
+                                    height=world_y*scale if world_y <30 else 30*scale,
+                                    borderwidth=0,
+                                    highlightthickness=0,
+                                    bg="black",
+                                    # scrollregion=(0,0,0,62*scale)
+                                    )
             self.canvas.grid()
+            self.frame=tk.Frame(self.canvas,width=world_x*scale,height=world_y*scale, bg="black")
+            self.canvas.create_window(0,0,window=self.frame,anchor='nw')
+            self.scrollbar = tk.Scrollbar(self.root, orient='vertical',command=self.canvas.yview)
+            self.scrollbar.grid(row=0, column=1, sticky=tk.NS)
+            self.canvas.config(yscrollcommand=self.scrollbar.set)
+            self.canvas.configure(scrollregion=self.canvas.bbox("all"))
             self.root.update()
         self.canvas.delete("all")
         action_inset = 0.1
@@ -354,9 +381,9 @@ class TabQAgent(object):
         # (NSWE to match action order)
         min_value = -20
         max_value = 20
-        for x in range(-4,10):
+        for x in range(start_x,start_x+world_x+1):
             ax = x + x_offset
-            for y in range(-2,25):
+            for y in range(start_y,start_y+world_y+1):
                 ay = y +y_offset
                 s = "%f:%f" % (x+0.5,y+0.5)
                 self.canvas.create_rectangle( ax*scale, ay*scale, (ax+1)*scale, (ay+1)*scale, outline="#fff", fill="")
