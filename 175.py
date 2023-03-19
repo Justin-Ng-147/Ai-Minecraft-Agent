@@ -51,7 +51,7 @@ class TabQAgent(object):
     """Tabular Q-learning agent for discrete state/action spaces."""
 
     def __init__(self):
-        self.epsilon = 0.01 # chance of taking a random action instead of the best
+        self.epsilon = 0.00 # chance of taking a random action instead of the best
 
         self.logger = logging.getLogger(__name__)
         if False: # True if you want to see more information
@@ -342,7 +342,7 @@ class TabQAgent(object):
             world_x = 13
             world_y = 26
             x_offset = 4
-            y_offset = 2
+            y_offset = 0
             start_x = -4
             start_y = -2
         elif(map == 3):
@@ -379,8 +379,8 @@ class TabQAgent(object):
         action_offset = .4
         curr_radius = 0.2
         # (NSWE to match action order)
-        min_value = -20
-        max_value = 20
+        min_value = -125
+        max_value = 125
         for x in range(start_x,start_x+world_x+1):
             ax = x + x_offset
             for y in range(start_y,start_y+world_y+1):
