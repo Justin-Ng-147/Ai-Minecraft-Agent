@@ -212,27 +212,29 @@ class TabQAgent(object):
             a = random.randint(0, len(self.actions) - 1)
             self.logger.info("Random action: %s" % self.actions[a])
         else:
+
+            if self.prev_a is not None:
+                if self.prev_a == 1:
+                    self.q_table[current_s][2] = -100
+                    self.q_table[current_s][5] = -100
+                elif self.prev_a == 2:
+                    self.q_table[current_s][1] = -100
+                    self.q_table[current_s][4] = -100
+                elif self.prev_a == 4:
+                    self.q_table[current_s][2] = -100
+                    self.qtable[current_s][5] = -100
+                elif self.prev_a == 5:
+                    self.q_table[current_s][1] = -100
+                    self.q_table[current_s][4] = -100
+
             # checking for max val on q table
             m = max(self.q_table[current_s])
-
-             #changes::::: hard codes for more punishment for reaching same block:::::::
-            if m == self._MOVE_COST: #moving to a block it already has been to 
-                for x in range(0,len(self.actions)):
-                    if self.q_table[current_s][x] == m:
-                        self.q_table[current_s][x] -= 100
-                m = max(self.q_table[current_s])
-                
-            elif m == self._JUMP_COST: #jumping to a block it already has been to
-                for x in range(0,len(self.actions)):
-                    if self.q_table[current_s][x] == m:
-                        self.q_table[current_s][x] -= 100
-                m = max(self.q_table[current_s])
             
             # grab list of actions and if that action already appeared during this, add penalty
             self.logger.info("Current values(%s): %s" % (current_s, ",".join(str(x) for x in self.q_table[current_s])))
-            self.logger.info("OBS observations ---------------")
-            self.logger.info(obs)
-            self.logger.info("--------------------------------")
+            # self.logger.info("OBS observations ---------------")
+            # self.logger.info(obs)
+            # self.logger.info("--------------------------------")
             self.logger.info(self.actions)
             l = list()
             # for all possible acttions
@@ -260,6 +262,10 @@ class TabQAgent(object):
 
         except RuntimeError as e:
             self.logger.error("Failed to send command: %s" % e)
+
+        if(a >= 3):
+            if(self.q_table[current_s][a-3]==0):
+                self.q_table[current_s][a-3]=101
 
         return current_r
 
@@ -484,7 +490,7 @@ max_retries = 3
 if agent_host.receivedArgument("test"):
     num_repeats = 1
 else:
-    num_repeats = 80
+    num_repeats = 800
 
 cumulative_rewards = []
 for i in range(num_repeats):

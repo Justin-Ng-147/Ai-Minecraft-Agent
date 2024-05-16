@@ -51,7 +51,7 @@
 
 
       </DrawingDecorator>
-      <ServerQuitFromTimeUp timeLimitMs="20000"/>
+      <ServerQuitFromTimeUp timeLimitMs="20000000"/>
       <ServerQuitWhenAnyAgentFinishes/>
     </ServerHandlers>
   </ServerSection>
@@ -67,7 +67,7 @@
       <RewardForTouchingBlockType>
         <Block reward="-100.0" type="lava" behaviour="onceOnly"/>
         <Block reward="1000.0" type="lapis_block" behaviour="onceOnly"/>
-        <Block reward= "2"   type="sandstone" behaviour="oncePerBlock"/>
+        <Block reward= "100"   type="sandstone" behaviour="oncePerBlock"/>
       </RewardForTouchingBlockType>
       <RewardForSendingCommand reward="-5" />
       <AgentQuitFromTouchingBlockType>
